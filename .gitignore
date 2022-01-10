@@ -1,0 +1,12 @@
+__pycache__/
+data/
+out/
+
+*.jpg
+*.json
+*.log
+*.npy
+*.png
+*.pth.tar
+*.tar
+*.tif

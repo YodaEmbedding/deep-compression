@@ -1,0 +1,1 @@
+from .decorr import FactorizedPriorDecorr
