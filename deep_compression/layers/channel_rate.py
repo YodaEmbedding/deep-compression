@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 import torch.nn as nn
 
@@ -31,8 +33,10 @@ class ChannelRateInverse(nn.Module):
 
         self.rates = rates
 
-    def forward(self, x: torch.Tensor):
-        return x * self.rates.reshape(-1, 1, 1)
+    def forward(self, x: torch.Tensor, rates: Optional[torch.Tensor] = None):
+        if rates is None:
+            rates = self.rates
+        return x * rates.reshape(-1, 1, 1)
 
 
 def create_pair(
