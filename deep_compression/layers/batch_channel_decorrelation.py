@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 import torch.nn as nn
 
@@ -5,6 +7,9 @@ from .utils import channel_covariance
 
 
 class BatchChannelDecorrelation(nn.Module):
+    running_k: torch.Tensor
+    running_u: torch.Tensor
+
     def __init__(
         self,
         num_features: int,
@@ -37,14 +42,14 @@ class BatchChannelDecorrelation(nn.Module):
     def _update(self, x):
         k_new = channel_covariance(x)
 
-        self.running_k = (
+        self.running_k[:] = (
             self.momentum_k * k_new + (1 - self.momentum_k) * self.running_k
         )
 
         # K = U V U^T
         _, u_new = torch.linalg.eigh(self.running_k)
 
-        self.running_u = (
+        self.running_u[:] = (
             self.momentum_u * u_new + (1 - self.momentum_u) * self.running_u
         )
 
