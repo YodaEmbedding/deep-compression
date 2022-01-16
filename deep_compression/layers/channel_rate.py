@@ -14,7 +14,7 @@ class ChannelRate(nn.Module):
         super().__init__()
 
         kw = {"device": device, "dtype": dtype}
-        self.rates = nn.Parameter(torch.zeros(num_features, **kw))
+        self.rates = nn.Parameter(torch.ones(num_features, **kw))
 
     def forward(self, x):
         return x / self.rates.reshape(-1, 1, 1)
