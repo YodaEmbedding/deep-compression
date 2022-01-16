@@ -14,27 +14,28 @@ from compressai.models.waseda import Cheng2020Anchor
 from deep_compression.layers import (
     BatchChannelDecorrelation,
     BatchChannelDecorrelationInverse,
+    batch_channel_decorrelation,
 )
-
-# TODO simpler definition: link decorrelator_inv and override g_a, g_s
 
 
 class FactorizedPriorDecorr(FactorizedPrior):
     def __init__(self, N, M, momentum_k=0.0, momentum_u=0.0, **kwargs):
         super().__init__(N, M, **kwargs)
 
-        self.decorrelator = BatchChannelDecorrelation(
+        (
+            self.decorrelator,
+            self.decorrelator_inv,
+        ) = batch_channel_decorrelation.create_pair(
             num_features=M,
             momentum_k=momentum_k,
             momentum_u=momentum_u,
         )
-        self.decorrelator_inv = BatchChannelDecorrelationInverse()
 
     def forward(self, x):
         y = self.g_a(x)
         y = self.decorrelator(y)
         y_hat, y_likelihoods = self.entropy_bottleneck(y)
-        y_hat = self.decorrelator_inv(y_hat, self.decorrelator.running_u)
+        y_hat = self.decorrelator_inv(y_hat)
         x_hat = self.g_s(y_hat)
 
         return {
@@ -53,7 +54,7 @@ class FactorizedPriorDecorr(FactorizedPrior):
     def decompress(self, strings, shape):
         assert isinstance(strings, list) and len(strings) == 1
         y_hat = self.entropy_bottleneck.decompress(strings[0], shape)
-        y_hat = self.decorrelator_inv(y_hat, self.decorrelator.running_u)
+        y_hat = self.decorrelator_inv(y_hat)
         x_hat = self.g_s(y_hat).clamp_(0, 1)
         return {"x_hat": x_hat}
 

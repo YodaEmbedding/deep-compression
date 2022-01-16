@@ -55,9 +55,48 @@ class BatchChannelDecorrelation(nn.Module):
 
 
 class BatchChannelDecorrelationInverse(nn.Module):
-    def forward(self, x, u):
+    running_k: torch.Tensor
+    running_u: torch.Tensor
+
+    def __init__(
+        self,
+        running_k: torch.Tensor,
+        running_u: torch.Tensor,
+    ):
+        super().__init__()
+
+        self.running_k = running_k
+        self.running_u = running_u
+
+    def forward(self, x: torch.Tensor, u: Optional[torch.Tensor] = None):
+        if u is None:
+            u = self.running_u
+
         # x = u @ x
         # x = torch.einsum("ij, nj... -> ni...", u, x)
         x = torch.einsum("ij, njyx -> niyx", u, x)
 
         return x
+
+
+def create_pair(
+    num_features: int,
+    momentum_k: float = 0.0,
+    momentum_u: float = 0.0,
+    device=None,
+    dtype=None,
+) -> tuple[BatchChannelDecorrelation, BatchChannelDecorrelationInverse]:
+    decorrelator = BatchChannelDecorrelation(
+        num_features=num_features,
+        momentum_k=momentum_k,
+        momentum_u=momentum_u,
+        device=device,
+        dtype=dtype,
+    )
+
+    decorrelator_inv = BatchChannelDecorrelationInverse(
+        running_k=decorrelator.running_k,
+        running_u=decorrelator.running_u,
+    )
+
+    return decorrelator, decorrelator_inv
