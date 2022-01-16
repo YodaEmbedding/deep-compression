@@ -15,6 +15,7 @@ from deep_compression.layers import (
     BatchChannelDecorrelation,
     BatchChannelDecorrelationInverse,
     batch_channel_decorrelation,
+    channel_rate,
 )
 
 
@@ -31,10 +32,19 @@ class FactorizedPriorDecorr(FactorizedPrior):
             momentum_u=momentum_u,
         )
 
+        (
+            self.channel_rate_controller,
+            self.channel_rate_controller_inv,
+        ) = channel_rate.create_pair(
+            num_features=M,
+        )
+
     def forward(self, x):
         y = self.g_a(x)
         y = self.decorrelator(y)
+        y = self.channel_rate_controller(y)
         y_hat, y_likelihoods = self.entropy_bottleneck(y)
+        y_hat = self.channel_rate_controller_inv(y_hat)
         y_hat = self.decorrelator_inv(y_hat)
         x_hat = self.g_s(y_hat)
 
@@ -48,12 +58,14 @@ class FactorizedPriorDecorr(FactorizedPrior):
     def compress(self, x):
         y = self.g_a(x)
         y = self.decorrelator(y)
+        y = self.channel_rate_controller(y)
         y_strings = self.entropy_bottleneck.compress(y)
         return {"strings": [y_strings], "shape": y.size()[-2:]}
 
     def decompress(self, strings, shape):
         assert isinstance(strings, list) and len(strings) == 1
         y_hat = self.entropy_bottleneck.decompress(strings[0], shape)
+        y_hat = self.channel_rate_controller_inv(y_hat)
         y_hat = self.decorrelator_inv(y_hat)
         x_hat = self.g_s(y_hat).clamp_(0, 1)
         return {"x_hat": x_hat}
