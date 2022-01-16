@@ -44,8 +44,10 @@ class FactorizedPriorDecorr(FactorizedPrior):
         y = self.decorrelator(y)
         y = self.channel_rate_controller(y)
         y_hat, y_likelihoods = self.entropy_bottleneck(y)
-        y_hat = self.channel_rate_controller_inv(y_hat)
-        y_hat = self.decorrelator_inv(y_hat)
+        y_hat = self.channel_rate_controller_inv(
+            y_hat, self.channel_rate_controller.rates
+        )
+        y_hat = self.decorrelator_inv(y_hat, self.decorrelator.running_u)
         x_hat = self.g_s(y_hat)
 
         return {
@@ -65,8 +67,10 @@ class FactorizedPriorDecorr(FactorizedPrior):
     def decompress(self, strings, shape):
         assert isinstance(strings, list) and len(strings) == 1
         y_hat = self.entropy_bottleneck.decompress(strings[0], shape)
-        y_hat = self.channel_rate_controller_inv(y_hat)
-        y_hat = self.decorrelator_inv(y_hat)
+        y_hat = self.channel_rate_controller_inv(
+            y_hat, self.channel_rate_controller.rates
+        )
+        y_hat = self.decorrelator_inv(y_hat, self.decorrelator.running_u)
         x_hat = self.g_s(y_hat).clamp_(0, 1)
         return {"x_hat": x_hat}
 
