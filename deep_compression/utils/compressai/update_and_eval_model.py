@@ -7,7 +7,13 @@ from compressai.zoo.image import model_architectures as architectures
 
 def load_checkpoint(arch: str, checkpoint_path: str) -> nn.Module:
     ckpt = torch.load(checkpoint_path)
-    state_dict = ckpt["state_dict"] if "state_dict" in ckpt else ckpt
+    state_dict = (
+        ckpt["model_state_dict"]
+        if "model_state_dict" in ckpt
+        else ckpt["state_dict"]
+        if "state_dict" in ckpt
+        else ckpt
+    )
     state_dict = load_state_dict(state_dict)
     model = architectures[arch].from_state_dict(state_dict).eval()
     model.update(force=True)
