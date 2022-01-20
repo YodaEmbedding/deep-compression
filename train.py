@@ -17,6 +17,7 @@ from torchvision import transforms
 import deep_compression
 from deep_compression.losses import RateDistortionLoss
 from deep_compression.zoo import model_architectures
+from deep_compression.utils.catalyst import EveryCheckpointCallback
 
 
 class CustomRunner(dl.Runner):
@@ -248,6 +249,15 @@ def main(argv=None):
                 mode="epoch",
                 loader_key="valid",
                 metric_key="loss",
+            ),
+            EveryCheckpointCallback(
+                logdir=os.path.join(logdir, "checkpoints_all"),
+                loader_key="valid",
+                metric_key="loss",
+                minimize=True,
+                mode="full",
+                resume=resume,
+                # save_n_best=1,
             ),
             dl.CheckpointCallback(
                 logdir=os.path.join(logdir, "checkpoints"),
