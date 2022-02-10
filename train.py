@@ -26,10 +26,6 @@ class CustomRunner(dl.Runner):
     optimizer: dict[str, Optimizer]
     metrics: dict[str, metrics.IMetric]
 
-    def predict_batch(self, batch):
-        # TODO compress/decompress?
-        return self.model(batch[0].to(self.device))
-
     def on_loader_start(self, runner):
         super().on_loader_start(runner)
         keys = ["loss", "aux_loss", "bpp_loss", "mse_loss"]
@@ -64,7 +60,28 @@ class CustomRunner(dl.Runner):
             self.optimizer["aux"].zero_grad()
 
         d = {"loss": loss, "aux_loss": aux_loss, **out_criterion}
+        self.batch_metrics.update(d)
 
+        for key in self.meters.keys():
+            self.meters[key].update(
+                self.batch_metrics[key].item(),
+                self.batch_size,
+            )
+
+    def predict_batch(self, batch):
+        print(self.engine.device)
+        print(batch.device)
+
+        x = batch.to(self.engine.device)
+
+        # TODO compress/decompress?
+        out_net = self.model(x)
+        out_criterion = self.criterion(out_net, x)
+
+        loss = out_criterion["loss"]
+        aux_loss = self.model.aux_loss()
+
+        d = {"loss": loss, "aux_loss": aux_loss, **out_criterion}
         self.batch_metrics.update(d)
 
         for key in self.meters.keys():
