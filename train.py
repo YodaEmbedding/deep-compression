@@ -283,8 +283,6 @@ def main(argv=None):
         # check=True,
     )
 
-    # TODO save ALL checkpoints to args.checkpoints_all_dir/{date/epoch}.pth
-
 
 if __name__ == "__main__":
     main()
