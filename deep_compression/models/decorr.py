@@ -5,7 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from compressai.models.google import (
     CompressionModel,
-    FactorizedPrior,
     JointAutoregressiveHierarchicalPriors,
     ScaleHyperprior,
 )
@@ -16,6 +15,9 @@ from deep_compression.layers import (
     BatchChannelDecorrelationInverse,
     batch_channel_decorrelation,
     channel_rate,
+)
+from deep_compression.models.compressai import (
+    FactorizedPrior,
 )
 
 

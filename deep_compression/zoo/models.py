@@ -2,10 +2,15 @@ import compressai.zoo as cai_zoo
 import compressai.zoo.image as cai_zoo_img
 
 import deep_compression.zoo.compressai_base as cai_base
-from deep_compression.models import FactorizedPriorDecorr
+from deep_compression.models import FactorizedPrior, FactorizedPriorDecorr
 
 
 def setup_models():
+    _register_model_copy(
+        model_type=FactorizedPrior,
+        model_name="bmshj2018-factorized",
+        base_model_name="bmshj2018-factorized",
+    )
     _register_model_copy(
         model_type=FactorizedPriorDecorr,
         model_name="bmshj2018-factorized-batch-chan-decorr",
