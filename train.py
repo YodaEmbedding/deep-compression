@@ -173,6 +173,11 @@ def main(argv=None):
                 transforms.ToTensor(),
             ]
         ),
+        "test": transforms.Compose(
+            [
+                transforms.ToTensor(),
+            ]
+        ),
     }
 
     datasets = {
@@ -180,7 +185,10 @@ def main(argv=None):
             conf.dataset, split="train", transform=data_transforms["train"]
         ),
         "valid": ImageFolder(
-            conf.dataset, split="test", transform=data_transforms["valid"]
+            conf.dataset, split="valid", transform=data_transforms["valid"]
+        ),
+        "test": ImageFolder(
+            conf.dataset, split="test", transform=data_transforms["test"]
         ),
     }
 
@@ -195,6 +203,13 @@ def main(argv=None):
         "valid": DataLoader(
             datasets["valid"],
             batch_size=conf.data.test_batch_size,
+            num_workers=conf.data.num_workers,
+            shuffle=False,
+            pin_memory=(device == "cuda"),
+        ),
+        "infer": DataLoader(
+            datasets["test"],
+            batch_size=1,
             num_workers=conf.data.num_workers,
             shuffle=False,
             pin_memory=(device == "cuda"),
