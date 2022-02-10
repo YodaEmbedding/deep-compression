@@ -2,6 +2,7 @@ from typing import Optional
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from numpy import linalg as LA
 
 
@@ -191,18 +192,56 @@ def decorrelation_matrix(
     raise ValueError(f"Unknown mode {mode}.")
 
 
-def inference(model, img):
+@torch.no_grad()
+def inference_single_image_uint8(
+    model, img: np.ndarray
+) -> tuple[np.ndarray, list[bytes]]:
     x = preprocess_img(img)
 
-    with torch.no_grad():
-        enc_dict = model.compress(x)
-
+    enc_dict = model.compress(x)
     encoded = [x[0] for x in enc_dict["strings"]]
+    dec_dict = model.decompress(**enc_dict)
 
-    with torch.no_grad():
-        result = model.decompress(**enc_dict)
-
-    x_hat = result["x_hat"].numpy()[0]
+    x_hat = dec_dict["x_hat"].numpy()[0]
     img_rec = postprocess_img(x_hat)
 
     return img_rec, encoded
+
+
+@torch.no_grad()
+def inference(model, x: torch.Tensor, skip_decompress=True):
+    """Run compression model on image batch."""
+    n, _, h, w = x.shape
+    pad, unpad = _get_pad(h, w)
+
+    x_padded = F.pad(x, pad, mode="constant", value=0)
+    out_enc = model.compress(x_padded)
+    out_dec = (
+        model(x_padded)
+        if skip_decompress
+        else model.decompress(out_enc["strings"], out_enc["shape"])
+    )
+    out_dec["x_hat"] = F.pad(out_dec["x_hat"], unpad)
+
+    num_pixels = n * h * w
+    num_bits = sum(len(s[0]) for s in out_enc["strings"]) * 8.0
+    bpp = num_bits / num_pixels
+
+    return {
+        "out_enc": out_enc,
+        "out_dec": out_dec,
+        "bpp": bpp,
+    }
+
+
+def _get_pad(h, w):
+    p = 64  # maximum 6 strides of 2
+    new_h = (h + p - 1) // p * p
+    new_w = (w + p - 1) // p * p
+    padding_left = (new_w - w) // 2
+    padding_right = new_w - w - padding_left
+    padding_top = (new_h - h) // 2
+    padding_bottom = new_h - h - padding_top
+    pad = (padding_left, padding_right, padding_top, padding_bottom)
+    unpad = (-padding_left, -padding_right, -padding_top, -padding_bottom)
+    return pad, unpad

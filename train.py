@@ -18,6 +18,7 @@ import deep_compression
 from deep_compression.losses import RateDistortionLoss
 from deep_compression.zoo import model_architectures
 from deep_compression.utils.catalyst import EveryCheckpointCallback
+from deep_compression.utils.utils import inference
 
 
 class CustomRunner(dl.Runner):
@@ -74,8 +75,7 @@ class CustomRunner(dl.Runner):
 
         x = batch.to(self.engine.device)
 
-        # TODO compress/decompress?
-        out_net = self.model(x)
+        out_net = inference(self.model, x)
         out_criterion = self.criterion(out_net, x)
 
         loss = out_criterion["loss"]
