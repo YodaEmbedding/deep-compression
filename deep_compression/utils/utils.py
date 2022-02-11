@@ -215,12 +215,14 @@ def inference(model, x: torch.Tensor, skip_decompress=True):
     pad, unpad = _get_pad(h, w)
 
     x_padded = F.pad(x, pad, mode="constant", value=0)
+    out_net = model(x_padded)
+    out_net["x_hat"] = F.pad(out_net["x_hat"], unpad)
     out_enc = model.compress(x_padded)
-    out_dec = (
-        model(x_padded)
-        if skip_decompress
-        else model.decompress(out_enc["strings"], out_enc["shape"])
-    )
+    if skip_decompress:
+        out_dec = dict(out_net)
+        del out_dec["likelihoods"]
+    else:
+        out_dec = model.decompress(out_enc["strings"], out_enc["shape"])
     out_dec["x_hat"] = F.pad(out_dec["x_hat"], unpad)
 
     num_pixels = n * h * w
@@ -228,6 +230,7 @@ def inference(model, x: torch.Tensor, skip_decompress=True):
     bpp = num_bits / num_pixels
 
     return {
+        "out_net": out_net,
         "out_enc": out_enc,
         "out_dec": out_dec,
         "bpp": bpp,

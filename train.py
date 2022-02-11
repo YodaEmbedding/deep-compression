@@ -78,7 +78,8 @@ class CustomRunner(dl.Runner):
 
         x = batch.to(self.engine.device)
 
-        out_net = inference(self.model, x)
+        out_infer = inference(self.model, x)
+        out_net = out_infer["out_net"]
         out_criterion = self.criterion(out_net, x)
         out_metrics = compute_metrics(x, out_net["x_hat"], ["psnr", "msssim"])
 
@@ -90,6 +91,7 @@ class CustomRunner(dl.Runner):
             "aux_loss": aux_loss,
             **out_criterion,
             **out_metrics,
+            "bpp": out_infer["bpp"],
         }
 
         self.batch_metrics.update(d)
