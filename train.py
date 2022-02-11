@@ -16,10 +16,10 @@ from torchvision import transforms
 
 import deep_compression
 from deep_compression.losses import RateDistortionLoss
-from deep_compression.zoo import model_architectures
 from deep_compression.utils.catalyst import EveryCheckpointCallback
 from deep_compression.utils.metrics import compute_metrics
 from deep_compression.utils.utils import inference
+from deep_compression.zoo import model_architectures
 
 
 class CustomRunner(dl.Runner):
