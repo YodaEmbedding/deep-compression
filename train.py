@@ -33,6 +33,7 @@ class CustomRunner(dl.Runner):
         keys = ["loss", "aux_loss", "bpp_loss", "mse_loss"]
         if self.is_infer_loader:
             keys += ["psnr", "ms-ssim"]
+            keys += ["bpp"]
             self.model.update()
         self.meters = {
             key: metrics.AdditiveMetric(compute_on_call=False) for key in keys
