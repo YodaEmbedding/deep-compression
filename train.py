@@ -32,7 +32,7 @@ class CustomRunner(dl.Runner):
         super().on_loader_start(runner)
         keys = ["loss", "aux_loss", "bpp_loss", "mse_loss"]
         if self.is_infer_loader:
-            keys += ["psnr", "msssim"]
+            keys += ["psnr", "ms-ssim"]
             self.model.update()
         self.meters = {
             key: metrics.AdditiveMetric(compute_on_call=False) for key in keys
@@ -85,7 +85,7 @@ class CustomRunner(dl.Runner):
         out_infer = inference(self.model, x)
         out_net = out_infer["out_net"]
         out_criterion = self.criterion(out_net, x)
-        out_metrics = compute_metrics(x, out_net["x_hat"], ["psnr", "msssim"])
+        out_metrics = compute_metrics(x, out_net["x_hat"], ["psnr", "ms-ssim"])
 
         loss = out_criterion["loss"]
         aux_loss = self.model.aux_loss()

@@ -20,5 +20,7 @@ def msssim(a: torch.Tensor, b: torch.Tensor) -> float:
 
 _METRICS = {
     "psnr": psnr,
+    "msssim": msssim,
     "ms-ssim": msssim,
+    "ms_ssim": msssim,
 }
