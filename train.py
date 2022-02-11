@@ -33,11 +33,15 @@ class CustomRunner(dl.Runner):
         keys = ["loss", "aux_loss", "bpp_loss", "mse_loss"]
         if self.is_infer_loader:
             keys += ["psnr", "msssim"]
+            self.model.update()
         self.meters = {
             key: metrics.AdditiveMetric(compute_on_call=False) for key in keys
         }
 
     def handle_batch(self, batch):
+        if self.is_infer_loader:
+            return self.predict_batch(batch)
+
         x = batch
 
         out_net = self.model(x)
