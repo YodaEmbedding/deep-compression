@@ -78,9 +78,6 @@ class CustomRunner(dl.Runner):
             )
 
     def predict_batch(self, batch):
-        print(self.engine.device)
-        print(batch.device)
-
         x = batch.to(self.engine.device)
 
         out_infer = inference(self.model, x)
