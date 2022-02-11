@@ -73,7 +73,7 @@ class CustomRunner(dl.Runner):
 
         for key in self.meters.keys():
             self.meters[key].update(
-                self.batch_metrics[key].item(),
+                _coerce_item(self.batch_metrics[key]),
                 self.batch_size,
             )
 
@@ -103,7 +103,7 @@ class CustomRunner(dl.Runner):
 
         for key in self.meters.keys():
             self.meters[key].update(
-                self.batch_metrics[key].item(),
+                _coerce_item(self.batch_metrics[key]),
                 self.batch_size,
             )
 
@@ -111,6 +111,10 @@ class CustomRunner(dl.Runner):
         for key in self.meters.keys():
             self.loader_metrics[key] = self.meters[key].compute()[0]
         super().on_loader_end(runner)
+
+
+def _coerce_item(x):
+    return x.item() if hasattr(x, "item") else x
 
 
 def configure_optimizers(net, args):
