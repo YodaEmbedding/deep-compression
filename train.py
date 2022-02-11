@@ -18,6 +18,7 @@ import deep_compression
 from deep_compression.losses import RateDistortionLoss
 from deep_compression.zoo import model_architectures
 from deep_compression.utils.catalyst import EveryCheckpointCallback
+from deep_compression.utils.metrics import compute_metrics
 from deep_compression.utils.utils import inference
 
 
@@ -30,6 +31,8 @@ class CustomRunner(dl.Runner):
     def on_loader_start(self, runner):
         super().on_loader_start(runner)
         keys = ["loss", "aux_loss", "bpp_loss", "mse_loss"]
+        if self.is_infer_loader:
+            keys += ["psnr", "msssim"]
         self.meters = {
             key: metrics.AdditiveMetric(compute_on_call=False) for key in keys
         }
@@ -77,11 +80,18 @@ class CustomRunner(dl.Runner):
 
         out_net = inference(self.model, x)
         out_criterion = self.criterion(out_net, x)
+        out_metrics = compute_metrics(x, out_net["x_hat"], ["psnr", "msssim"])
 
         loss = out_criterion["loss"]
         aux_loss = self.model.aux_loss()
 
-        d = {"loss": loss, "aux_loss": aux_loss, **out_criterion}
+        d = {
+            "loss": loss,
+            "aux_loss": aux_loss,
+            **out_criterion,
+            **out_metrics,
+        }
+
         self.batch_metrics.update(d)
 
         for key in self.meters.keys():
