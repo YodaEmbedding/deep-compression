@@ -8,13 +8,15 @@ import torch
 import torch.optim as optim
 from catalyst import dl, metrics
 from catalyst.typing import Criterion, Optimizer
-from compressai.datasets import ImageFolder
 from compressai.models.google import CompressionModel
 from omegaconf import OmegaConf
-from torch.utils.data import DataLoader
-from torchvision import transforms
 
 import deep_compression
+from deep_compression.datasets.utils import (
+    get_data_transforms,
+    get_dataloaders,
+    get_datasets,
+)
 from deep_compression.losses import (
     BatchChannelDecorrelationLoss,
     RateDistortionLoss,
@@ -208,61 +210,9 @@ def main(argv=None):
     catalyst.utils.set_global_seed(seed)
     catalyst.utils.prepare_cudnn(benchmark=True)
 
-    data_transforms = {
-        "train": transforms.Compose(
-            [
-                transforms.RandomCrop(conf.data.patch_size),
-                transforms.ToTensor(),
-            ]
-        ),
-        "valid": transforms.Compose(
-            [
-                transforms.CenterCrop(conf.data.patch_size),
-                transforms.ToTensor(),
-            ]
-        ),
-        "test": transforms.Compose(
-            [
-                transforms.ToTensor(),
-            ]
-        ),
-    }
-
-    datasets = {
-        "train": ImageFolder(
-            conf.dataset, split="train", transform=data_transforms["train"]
-        ),
-        "valid": ImageFolder(
-            conf.dataset, split="valid", transform=data_transforms["valid"]
-        ),
-        "test": ImageFolder(
-            conf.dataset, split="test", transform=data_transforms["test"]
-        ),
-    }
-
-    loaders = {
-        "train": DataLoader(
-            datasets["train"],
-            batch_size=conf.data.batch_size,
-            num_workers=conf.data.num_workers,
-            shuffle=True,
-            pin_memory=(device == "cuda"),
-        ),
-        "valid": DataLoader(
-            datasets["valid"],
-            batch_size=conf.data.test_batch_size,
-            num_workers=conf.data.num_workers,
-            shuffle=False,
-            pin_memory=(device == "cuda"),
-        ),
-        "infer": DataLoader(
-            datasets["test"],
-            batch_size=1,
-            num_workers=conf.data.num_workers,
-            shuffle=False,
-            pin_memory=(device == "cuda"),
-        ),
-    }
+    data_transforms = get_data_transforms()
+    datasets = get_datasets(conf, data_transforms)
+    loaders = get_dataloaders(conf, device, datasets)
 
     model = model_architectures[conf.model](**conf.hparams.model)
     model = model.to(device)
