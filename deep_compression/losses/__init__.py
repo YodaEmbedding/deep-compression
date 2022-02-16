@@ -1,1 +1,2 @@
+from .batch_channel_decorrelation import BatchChannelDecorrelationLoss
 from .rate_distortion import RateDistortionLoss
