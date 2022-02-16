@@ -1,5 +1,6 @@
 __pycache__/
 data/
+log*/
 out/
 
 *.jpg
@@ -7,6 +8,7 @@ out/
 *.log
 *.npy
 *.png
+*.pth
 *.pth.tar
 *.tar
 *.tif
