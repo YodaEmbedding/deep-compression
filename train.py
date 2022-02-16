@@ -15,7 +15,10 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 import deep_compression
-from deep_compression.losses import RateDistortionLoss
+from deep_compression.losses import (
+    BatchChannelDecorrelationLoss,
+    RateDistortionLoss,
+)
 from deep_compression.utils.catalyst import EveryCheckpointCallback
 from deep_compression.utils.metrics import compute_metrics
 from deep_compression.utils.utils import inference
@@ -112,6 +115,16 @@ class CustomRunner(dl.Runner):
 
 def _coerce_item(x):
     return x.item() if hasattr(x, "item") else x
+
+
+def create_criterion(conf):
+    if conf.name == "RateDistortionLoss":
+        return RateDistortionLoss(lmbda=conf.lambda_)
+    if conf.name == "BatchChannelDecorrelationLoss":
+        return BatchChannelDecorrelationLoss(
+            lmbda=conf.lambda_, lmbda_corr=conf.lambda_corr
+        )
+    raise ValueError("Unknown criterion.")
 
 
 def configure_optimizers(net, args):
@@ -254,7 +267,7 @@ def main(argv=None):
     model = model_architectures[conf.model](**conf.hparams.model)
     model = model.to(device)
 
-    criterion = RateDistortionLoss(lmbda=conf.hparams.criterion.lambda_)
+    criterion = create_criterion(conf.hparams.criterion)
     optimizer = configure_optimizers(model, conf.hparams.optimizer)
 
     # if args.checkpoint is not None:

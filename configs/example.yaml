@@ -21,6 +21,7 @@ hparams:
     learning_rate: 0.0001
     aux_learning_rate: 0.001
   criterion:
+    name: "RateDistortionLoss"
     lambda_: 0.001
   training:
     clip_max_norm: 1.0
