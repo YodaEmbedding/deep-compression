@@ -343,7 +343,7 @@ def main(argv=None):
                 logdir=os.path.join(logdir, "tensorboard"),
             ),
         },
-        # check=True,
+        check=conf.hparams.experiment.get("check", False),
     )
 
 
