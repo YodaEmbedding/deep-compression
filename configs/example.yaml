@@ -17,6 +17,7 @@ hparams:
   experiment:
     seed: 1234
     epochs: 200
+    patience: 7
   optimizer:
     learning_rate: 0.0001
     aux_learning_rate: 0.001

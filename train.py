@@ -187,7 +187,7 @@ def main(argv=None):
                 # save_n_best=1,
             ),
             dl.EarlyStoppingCallback(
-                patience=7,
+                patience=conf.hparams.experiment.patience,
                 loader_key="valid",
                 metric_key="loss",
                 minimize=True,
