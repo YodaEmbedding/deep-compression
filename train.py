@@ -146,7 +146,9 @@ def main(argv=None):
         "net": optim.lr_scheduler.ReduceLROnPlateau(optimizer["net"], "min"),
     }
 
-    runner = CustomRunner()
+    runner = CustomRunner(
+        config_path=args.config,
+    )
 
     runner.train(
         model=model,
