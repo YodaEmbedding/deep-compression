@@ -199,6 +199,10 @@ def main(argv=None):
             "tensorboard": dl.TensorboardLogger(
                 logdir=os.path.join(logdir, "tensorboard"),
             ),
+            "mlflow": dl.MLflowLogger(
+                experiment=conf.experiment,
+                run=conf.run,
+            ),
         },
         check=conf.hparams.experiment.get("check", False),
     )
