@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "deep-compression"
+version = "0.1.0"
+description = "Deep image/video compression experiments"
+authors = ["Mateen Ulhaq <mulhaq2005@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "3.9.6"
+catalyst = "21.11"
+compressai = "^1.1.9"
+matplotlib = "3.4.3"
+numpy = "^1.21.2"
+omegaconf = "2.1.1"
+Pillow = "^8.3.2"
+pytest = "^6.2.5"
+pytorch-msssim = "0.2.1"
+PyYAML = "^5.4.1"
+scipy = "1.6.*"
+seaborn = "^0.11.2"
+toml = "^0.10.2"
+torch = "1.9.0"
+torchvision = "^0.10.0"
+typing-extensions = "^3.10.0"
+
+[tool.poetry.dev-dependencies]
+black = "21.10b0"
+isort = "^5.9.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
