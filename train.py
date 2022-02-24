@@ -29,7 +29,9 @@ def create_criterion(conf):
         return RateDistortionLoss(lmbda=conf.lambda_)
     if conf.name == "BatchChannelDecorrelationLoss":
         return BatchChannelDecorrelationLoss(
-            lmbda=conf.lambda_, lmbda_corr=conf.lambda_corr
+            lmbda=conf.lambda_,
+            lmbda_corr=conf.lambda_corr,
+            top_k_corr=conf.top_k_corr,
         )
     raise ValueError("Unknown criterion.")
 
