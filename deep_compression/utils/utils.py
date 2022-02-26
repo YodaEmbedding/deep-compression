@@ -25,12 +25,11 @@ class ActivationHook:
 
 
 def preprocess_img(img):
-    x = (img.transpose(2, 0, 1) / 256).astype(np.float32)
+    x = (img.transpose(2, 0, 1) / 255).astype(np.float32)
     x = torch.from_numpy(x).unsqueeze(0)
     return x
 
 
-# TODO * 255 or * 256?
 def postprocess_img(x_hat: torch.Tensor):
     x = x_hat.squeeze(0).numpy()
     x = (x.transpose(1, 2, 0) * 255).clip(0, 255).astype(np.uint8)
