@@ -31,8 +31,9 @@ def preprocess_img(img):
 
 
 # TODO * 255 or * 256?
-def postprocess_img(img):
-    x = (img.transpose(1, 2, 0) * 255).clip(0, 255).astype(np.uint8)
+def postprocess_img(x_hat: torch.Tensor):
+    x = x_hat.squeeze(0).numpy()
+    x = (x.transpose(1, 2, 0) * 255).clip(0, 255).astype(np.uint8)
     return x
 
 
@@ -194,22 +195,19 @@ def decorrelation_matrix(
 
 @torch.no_grad()
 def inference_single_image_uint8(
-    model, img: np.ndarray
+    model, img: np.ndarray, device=None
 ) -> tuple[np.ndarray, list[bytes]]:
     x = preprocess_img(img)
-
-    enc_dict = model.compress(x)
-    encoded = [x[0] for x in enc_dict["strings"]]
-    dec_dict = model.decompress(**enc_dict)
-
-    x_hat = dec_dict["x_hat"].numpy()[0]
+    x = x.to(device=device)
+    result = inference(model, x, skip_decompress=False)
+    x_hat = result["out_dec"]["x_hat"].cpu()
     img_rec = postprocess_img(x_hat)
-
+    encoded = [s[0] for s in result["out_enc"]["strings"]]
     return img_rec, encoded
 
 
 @torch.no_grad()
-def inference(model, x: torch.Tensor, skip_decompress=True):
+def inference(model, x: torch.Tensor, skip_decompress=False):
     """Run compression model on image batch."""
     n, _, h, w = x.shape
     pad, unpad = _get_pad(h, w)
@@ -226,7 +224,7 @@ def inference(model, x: torch.Tensor, skip_decompress=True):
     out_dec["x_hat"] = F.pad(out_dec["x_hat"], unpad)
 
     num_pixels = n * h * w
-    num_bits = sum(len(s[0]) for s in out_enc["strings"]) * 8.0
+    num_bits = sum(sum(map(len, s)) for s in out_enc["strings"]) * 8.0
     bpp = num_bits / num_pixels
 
     return {

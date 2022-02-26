@@ -73,7 +73,7 @@ class CustomRunner(dl.Runner):
     def predict_batch(self, batch):
         x = batch.to(self.engine.device)
 
-        out_infer = inference(self.model, x)
+        out_infer = inference(self.model, x, skip_decompress=True)
         out_net = out_infer["out_net"]
         out_criterion = self.criterion(out_net, x)
         out_metrics = compute_metrics(x, out_net["x_hat"], ["psnr", "ms-ssim"])
