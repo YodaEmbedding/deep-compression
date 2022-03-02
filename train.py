@@ -20,7 +20,6 @@ from deep_compression.losses import (
     RateDistortionLoss,
 )
 from deep_compression.runners import CustomRunner
-from deep_compression.utils.catalyst import EveryCheckpointCallback
 from deep_compression.zoo import model_architectures
 
 
@@ -141,7 +140,7 @@ def main(argv=None):
         if not args.resume
         else args.checkpoint
         if args.checkpoint is not None
-        else "last_full"
+        else os.path.join(logdir, "checkpoints", "runner.last.pth")
     )
 
     scheduler = {
@@ -172,23 +171,14 @@ def main(argv=None):
                 loader_key="valid",
                 metric_key="loss",
             ),
-            EveryCheckpointCallback(
-                logdir=os.path.join(logdir, "checkpoints_all"),
-                loader_key="valid",
-                metric_key="loss",
-                minimize=True,
-                mode="full",
-                resume=resume,
-                # save_n_best=1,
-            ),
             dl.CheckpointCallback(
                 logdir=os.path.join(logdir, "checkpoints"),
                 loader_key="valid",
                 metric_key="loss",
                 minimize=True,
-                mode="full",
-                resume=resume,
-                # save_n_best=1,
+                mode="runner",
+                resume_runner=resume,
+                topk=10000,
             ),
             dl.EarlyStoppingCallback(
                 patience=conf.hparams.experiment.patience,

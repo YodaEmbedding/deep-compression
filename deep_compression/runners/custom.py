@@ -1,6 +1,6 @@
 import torch
 from catalyst import dl, metrics
-from catalyst.typing import Criterion, Optimizer
+from catalyst.typing import TorchCriterion, TorchOptimizer
 from compressai.models.google import CompressionModel
 
 from deep_compression.utils.metrics import compute_metrics
@@ -8,9 +8,9 @@ from deep_compression.utils.utils import inference
 
 
 class CustomRunner(dl.Runner):
-    criterion: Criterion
+    criterion: TorchCriterion
     model: CompressionModel
-    optimizer: dict[str, Optimizer]
+    optimizer: dict[str, TorchOptimizer]
     metrics: dict[str, metrics.IMetric]
 
     def __init__(self, *args, config_path=None, **kwargs):
