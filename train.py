@@ -1,12 +1,15 @@
 import argparse
 import os
 import sys
+from typing import Any
 
 import aim
 import catalyst
 import catalyst.utils
 import torch
 import torch.optim as optim
+import yaml
+from aim.sdk.utils import generate_run_hash
 from catalyst import dl
 from omegaconf import OmegaConf
 
@@ -72,6 +75,20 @@ def configure_optimizers(net, args):
     return {"net": optimizer, "aux": aux_optimizer}
 
 
+def configure_logs(logdir: str) -> dict[str, Any]:
+    filename = os.path.join(logdir, "info.yaml")
+    try:
+        with open(filename) as f:
+            config = yaml.safe_load(f)
+    except FileNotFoundError:
+        config = {}
+        config["run_hash"] = generate_run_hash()
+        os.makedirs(logdir, exist_ok=True)
+        with open(filename, "w") as f:
+            yaml.safe_dump(config, f)
+    return config
+
+
 def build_args(parser) -> argparse.ArgumentParser:
     parser.add_argument(
         "--config",
@@ -84,6 +101,12 @@ def build_args(parser) -> argparse.ArgumentParser:
         type=str,
         default="./logs",
         help="Path to logdir",
+    )
+    parser.add_argument(
+        "--aim_repo",
+        type=str,
+        default=".",
+        help="Path to directory containing .aim repo",
     )
     parser.add_argument(
         "--checkpoint",
@@ -145,6 +168,8 @@ def main(argv=None):
         else os.path.join(logdir, "checkpoints", "runner.last.pth")
     )
 
+    log_config = configure_logs(logdir)
+
     scheduler = {
         "net": optim.lr_scheduler.ReduceLROnPlateau(optimizer["net"], "min"),
     }
@@ -199,7 +224,11 @@ def main(argv=None):
             ),
             "aim": AimLogger(
                 experiment=conf.experiment,
-                repo=aim.Repo("."),
+                run_hash=log_config["run_hash"],
+                repo=aim.Repo(
+                    args.aim_repo,
+                    init=not aim.Repo.exists(args.aim_repo),
+                ),
             ),
         },
         check=conf.hp.experiment.get("check", False),
