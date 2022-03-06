@@ -45,9 +45,10 @@ class CustomRunner(dl.Runner):
 
         if self.is_train_loader:
             loss.backward()
-            if self.hparams["clip_max_norm"] > 0:
+            clip_max_norm = self.hparams["training"]["clip_max_norm"]
+            if clip_max_norm > 0:
                 torch.nn.utils.clip_grad_norm_(
-                    self.model.parameters(), self.hparams["clip_max_norm"]
+                    self.model.parameters(), clip_max_norm
                 )
             self.optimizer["net"].step()
 

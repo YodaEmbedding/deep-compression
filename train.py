@@ -112,21 +112,21 @@ def main(argv=None):
     args = parse_args(argv)
     conf = OmegaConf.load(args.config)
     logdir = args.logdir
-    seed = conf.hparams.experiment.seed
+    seed = conf.hp.experiment.seed
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     catalyst.utils.set_global_seed(seed)
     catalyst.utils.prepare_cudnn(benchmark=True)
 
-    data_transforms = get_data_transforms(conf)
+    data_transforms = get_data_transforms(conf.hp.data)
     datasets = get_datasets(conf, data_transforms)
-    loaders = get_dataloaders(conf, device, datasets)
+    loaders = get_dataloaders(conf.hp.data, device, datasets)
 
-    model = model_architectures[conf.model](**conf.hparams.model)
+    model = model_architectures[conf.hp.model](**conf.hp.model_params)
     model = model.to(device)
 
-    criterion = create_criterion(conf.hparams.criterion)
-    optimizer = configure_optimizers(model, conf.hparams.optimizer)
+    criterion = create_criterion(conf.hp.criterion)
+    optimizer = configure_optimizers(model, conf.hp.optimizer)
 
     # if args.checkpoint is not None:
     #     checkpoint = catalyst.utils.load_checkpoint(path=args.checkpoint)
@@ -160,8 +160,8 @@ def main(argv=None):
         scheduler=scheduler,
         loaders=loaders,
         logdir=logdir,
-        hparams=dict(conf.hparams.training),
-        num_epochs=conf.hparams.experiment.epochs,
+        hparams=OmegaConf.to_container(conf.hp),
+        num_epochs=conf.hp.experiment.epochs,
         valid_loader="valid",
         valid_metric="loss",
         minimize_valid_metric=True,
@@ -183,7 +183,7 @@ def main(argv=None):
                 topk=10000,
             ),
             dl.EarlyStoppingCallback(
-                patience=conf.hparams.experiment.patience,
+                patience=conf.hp.experiment.patience,
                 loader_key="valid",
                 metric_key="loss",
                 minimize=True,
@@ -202,7 +202,7 @@ def main(argv=None):
                 repo=aim.Repo("."),
             ),
         },
-        check=conf.hparams.experiment.get("check", False),
+        check=conf.hp.experiment.get("check", False),
     )
 
 

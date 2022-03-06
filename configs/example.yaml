@@ -1,23 +1,22 @@
 experiment: "example_experiment"
 run: "example_run"
-
 dataset: "../datasets/vimeo90k_compressai"
 
-base_model: "bmshj2018-factorized"
-model: "bmshj2018-factorized-batch-chan-decorr"
-
-data:
-  num_workers: 2
-  batch_size: 8
-  test_batch_size: 8
-  patch_size: [ 256, 256,]
-
-hparams:
+hp:
+  model: "bmshj2018-factorized-batch-chan-decorr"
+  base_model: "bmshj2018-factorized"
   experiment:
     seed: 1234
     epochs: 400
     patience: 100
+    check: False
+  data:
+    num_workers: 2
+    batch_size: 8
+    test_batch_size: 8
+    patch_size: [ 256, 256,]
   optimizer:
+    name: "Default"
     learning_rate: 0.0001
     aux_learning_rate: 0.001
   criterion:
@@ -25,7 +24,7 @@ hparams:
     lambda_: 0.001
   training:
     clip_max_norm: 1.0
-  model:
+  model_params:
     momentum_u: 0.0
     momentum_k: 0.0
     # Qualities 1-5
