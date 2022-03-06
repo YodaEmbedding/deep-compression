@@ -3,6 +3,7 @@ from catalyst import dl, metrics
 from catalyst.typing import TorchCriterion, TorchOptimizer
 from compressai.models.google import CompressionModel
 
+from deep_compression.utils import git
 from deep_compression.utils.metrics import compute_metrics
 from deep_compression.utils.utils import inference
 
@@ -19,7 +20,18 @@ class CustomRunner(dl.Runner):
 
     def on_experiment_start(self, runner):
         super().on_experiment_start(runner)
+        hparams = {}
+        hparams["git"] = {
+            "hash": git.commit_hash()[:7],
+            "main_hash": git.common_ancestor_hash()[:7],
+            "branch": git.branch_name(),
+        }
+        git_diff_path = "diff.patch"
+        with open(git_diff_path, "w") as f:
+            f.write(git.diff())
+        self.log_hparams(hparams)
         self.log_artifact("config", path_to_artifact=self._config_path)
+        self.log_artifact("git_diff", path_to_artifact=git_diff_path)
 
     def on_loader_start(self, runner):
         super().on_loader_start(runner)

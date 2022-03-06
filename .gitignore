@@ -9,6 +9,7 @@ out/
 *.json
 *.log
 *.npy
+*.patch
 *.png
 *.pth
 *.pth.tar
