@@ -23,7 +23,7 @@ hp:
     lambda_: 0.001
   training:
     clip_max_norm: 1.0
-  model_params:
+  model_hp:
     momentum_u: 0.0
     momentum_k: 0.0
     # Qualities 1-5

@@ -82,7 +82,7 @@ def main(argv=None):
     datasets = get_datasets(conf, data_transforms)
     loaders = get_dataloaders(conf.hp.data, device, datasets)
 
-    model = model_architectures[conf.hp.model](**conf.hp.model_params)
+    model = model_architectures[conf.hp.model](**conf.hp.model_hp)
     model = model.to(device)
 
     criterion = create_criterion(conf.hp.criterion)
