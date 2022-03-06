@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 
+import aim
 import catalyst
 import catalyst.utils
 import torch
@@ -20,6 +21,7 @@ from deep_compression.losses import (
     RateDistortionLoss,
 )
 from deep_compression.runners import CustomRunner
+from deep_compression.utils.catalyst import AimLogger
 from deep_compression.zoo import model_architectures
 
 
@@ -194,6 +196,10 @@ def main(argv=None):
             "mlflow": dl.MLflowLogger(
                 experiment=conf.experiment,
                 run=conf.run,
+            ),
+            "aim": AimLogger(
+                experiment=conf.experiment,
+                repo=aim.Repo("."),
             ),
         },
         check=conf.hparams.experiment.get("check", False),
