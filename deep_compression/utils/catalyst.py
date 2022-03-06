@@ -174,7 +174,9 @@ def _aim_context(
 ):
     if loader_key is None:
         loader_key = runner.loader_key
-    context = {"loader": loader_key}
+    context = {}
+    if loader_key is not None:
+        context["loader"] = loader_key
     if scope is not None:
         context["scope"] = scope
     kwargs = {}
