@@ -16,9 +16,7 @@ from deep_compression.layers import (
     batch_channel_decorrelation,
     channel_rate,
 )
-from deep_compression.models.compressai import (
-    FactorizedPrior,
-)
+from deep_compression.models.compressai import FactorizedPrior
 
 
 class FactorizedPriorDecorr(FactorizedPrior):

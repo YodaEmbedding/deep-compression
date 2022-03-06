@@ -1,19 +1,7 @@
 import importlib
 import sys
 
-# import compressai.utils
-
 import deep_compression
-
-# from compressai.utils.eval_model.__main__ import main
-
-# utils = {
-#     "plot": compressai.utils.plot.__main__,
-#     "bench": compressai.utils.bench.__main__,
-#     "find_close": compressai.utils.find_close.__main__,
-#     "eval_model": compressai.utils.eval_model.__main__,
-#     "update_model": compressai.utils.update_model.__main__,
-# }
 
 
 if __name__ == "__main__":
