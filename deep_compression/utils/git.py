@@ -26,4 +26,4 @@ def commit_hash(rev="HEAD", short=False):
 
 
 def diff(rev="HEAD"):
-    return os.popen(f"git diff {rev}").read().rstrip()
+    return os.popen(f"git --no-pager diff --no-color {rev}").read().rstrip()
