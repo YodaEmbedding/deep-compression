@@ -92,13 +92,21 @@ class AimLogger(ILogger):
         artifact: object = None,
         path_to_artifact: str = None,
         scope: str = None,
+        kind: str = "text",
+        artifact_kwargs: Dict[str, Any] = {},
     ) -> None:
         """Logs a local file or directory as an artifact to the logger."""
-        # NOTE: assumes all artifacts contain text data.
         if path_to_artifact:
-            with open(path_to_artifact) as f:
+            mode = "r" if kind == "text" else "rb"
+            with open(path_to_artifact, mode) as f:
                 artifact = f.read()
-        value = aim.Text(artifact)
+        kind_dict = {
+            "audio": aim.Audio,
+            "figure": aim.Figure,
+            "image": aim.Image,
+            "text": aim.Text,
+        }
+        value = kind_dict[kind](artifact, **artifact_kwargs)
         context, kwargs = _aim_context(runner, scope)
         self.run.track(value, tag, context=context, **kwargs)
 
@@ -108,9 +116,10 @@ class AimLogger(ILogger):
         image: np.ndarray,
         runner: "IRunner",
         scope: str = None,
+        image_kwargs: Dict[str, Any] = {},
     ) -> None:
         """Logs image to Aim for current scope on current step."""
-        value = aim.Image(image)
+        value = aim.Image(image, **image_kwargs)
         context, kwargs = _aim_context(runner, scope)
         self.run.track(value, tag, context=context, **kwargs)
 
