@@ -20,18 +20,9 @@ class CustomRunner(dl.Runner):
 
     def on_experiment_start(self, runner):
         super().on_experiment_start(runner)
-        hparams = {}
-        hparams["git"] = {
-            "hash": git.commit_hash()[:7],
-            "main_hash": git.common_ancestor_hash()[:7],
-            "branch": git.branch_name(),
-        }
-        git_diff_path = "diff.patch"
-        with open(git_diff_path, "w") as f:
-            f.write(git.diff())
-        self.log_hparams(hparams)
+        self._log_git_hparams()
+        self._log_git_diff()
         self.log_artifact("config", path_to_artifact=self._config_path)
-        self.log_artifact("git_diff", path_to_artifact=git_diff_path)
 
     def on_loader_start(self, runner):
         super().on_loader_start(runner)
@@ -114,6 +105,21 @@ class CustomRunner(dl.Runner):
         for key in self.meters.keys():
             self.loader_metrics[key] = self.meters[key].compute()[0]
         super().on_loader_end(runner)
+
+    def _log_git_diff(self):
+        git_diff_path = "diff.patch"
+        with open(git_diff_path, "w") as f:
+            f.write(git.diff())
+        self.log_artifact("git_diff", path_to_artifact=git_diff_path)
+
+    def _log_git_hparams(self):
+        hparams = {}
+        hparams["git"] = {
+            "hash": git.commit_hash()[:7],
+            "main_hash": git.common_ancestor_hash()[:7],
+            "branch": git.branch_name(),
+        }
+        self.log_hparams(hparams)
 
 
 def _coerce_item(x):
