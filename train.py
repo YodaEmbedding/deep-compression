@@ -146,10 +146,6 @@ def main(argv=None):
             "tensorboard": dl.TensorboardLogger(
                 logdir=os.path.join(logdir, "tensorboard"),
             ),
-            "mlflow": dl.MLflowLogger(
-                experiment=conf.experiment,
-                run=conf.run,
-            ),
             "aim": AimLogger(
                 experiment=conf.experiment,
                 run_hash=log_config["run_hash"],

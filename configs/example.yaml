@@ -1,5 +1,4 @@
 experiment: "example_experiment"
-run: "example_run"
 dataset: "../datasets/vimeo90k_compressai"
 
 hp:
