@@ -4,18 +4,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from compressai.models.google import (
-    CompressionModel,
     JointAutoregressiveHierarchicalPriors,
     ScaleHyperprior,
 )
-from compressai.models.waseda import Cheng2020Anchor
 
-from deep_compression.layers import (
-    BatchChannelDecorrelation,
-    BatchChannelDecorrelationInverse,
-    batch_channel_decorrelation,
-    channel_rate,
-)
+from deep_compression.layers import batch_channel_decorrelation, channel_rate
 from deep_compression.models.compressai import FactorizedPrior
 
 
