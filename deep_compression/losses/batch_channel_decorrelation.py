@@ -24,7 +24,7 @@ class BatchChannelDecorrelationLoss(nn.Module):
         y = output["y"]
         rates = channel_rates(y.detach().cpu().numpy())
         idx = rates.argsort()[::-1].copy()
-        y_top_k = y[idx[:self.top_k_corr]]
+        y_top_k = y[:, idx[: self.top_k_corr]]
         out["corr_loss"] = channel_correlation_loss(y_top_k)
 
         out["bpp_loss"] = sum(
@@ -42,7 +42,12 @@ class BatchChannelDecorrelationLoss(nn.Module):
 
 
 def channel_rates(y: np.ndarray, method="range") -> np.ndarray:
-    c, *_ = y.shape
+    rates_batch = np.stack([channel_rates_single(x, method=method) for x in y])
+    return rates_batch.sum(axis=0)
+
+
+def channel_rates_single(y: np.ndarray, method="range") -> np.ndarray:
+    c, _, _ = y.shape
     y = y.reshape(c, -1)
     y = y.round()
     y = y.astype(np.int32)
@@ -59,8 +64,9 @@ def entropy(labels):
 
 
 def channel_correlation_loss(y):
+    _, c, _, _ = y.shape
     cov_y = channel_covariance(y)
-    eye = torch.eye(y.shape[1], dtype=cov_y.dtype, device=cov_y.device)
+    eye = torch.eye(c, dtype=cov_y.dtype, device=cov_y.device)
     off_diagonal_mask = 1 - eye
     cov_off_y = cov_y * off_diagonal_mask
     return (cov_off_y ** 2).sum()
