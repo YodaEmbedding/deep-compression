@@ -1,2 +1,2 @@
 from .compressai import FactorizedPrior
-from .decorr import FactorizedPriorDecorr
+from .decorr import DecorrFactorizedPrior
