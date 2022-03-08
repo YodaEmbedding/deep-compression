@@ -12,7 +12,7 @@ class BatchChannelDecorrelation(nn.Module):
 
     def __init__(
         self,
-        num_features: int,
+        num_channels: int,
         momentum_k: float = 0.0,
         momentum_u: float = 0.0,
         device=None,
@@ -24,8 +24,8 @@ class BatchChannelDecorrelation(nn.Module):
         self.momentum_u = momentum_u
 
         kw = {"device": device, "dtype": dtype}
-        self.register_buffer("running_k", torch.eye(num_features, **kw))
-        self.register_buffer("running_u", torch.eye(num_features, **kw))
+        self.register_buffer("running_k", torch.eye(num_channels, **kw))
+        self.register_buffer("running_u", torch.eye(num_channels, **kw))
         # self.register_buffer("num_batches_tracked", ...)
 
     def forward(self, x):
@@ -80,14 +80,14 @@ class BatchChannelDecorrelationInverse(nn.Module):
 
 
 def create_pair(
-    num_features: int,
+    num_channels: int,
     momentum_k: float = 0.0,
     momentum_u: float = 0.0,
     device=None,
     dtype=None,
 ) -> tuple[BatchChannelDecorrelation, BatchChannelDecorrelationInverse]:
     decorrelator = BatchChannelDecorrelation(
-        num_features=num_features,
+        num_channels=num_channels,
         momentum_k=momentum_k,
         momentum_u=momentum_u,
         device=device,

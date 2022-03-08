@@ -27,7 +27,7 @@ class FactorizedPriorDecorr(FactorizedPrior):
             self.decorrelator,
             self.decorrelator_inv,
         ) = batch_channel_decorrelation.create_pair(
-            num_features=M,
+            num_channels=M,
             momentum_k=momentum_k,
             momentum_u=momentum_u,
         )
@@ -36,7 +36,7 @@ class FactorizedPriorDecorr(FactorizedPrior):
             self.channel_rate_controller,
             self.channel_rate_controller_inv,
         ) = channel_rate.create_pair(
-            num_features=M,
+            num_channels=M,
         )
 
     def forward(self, x):

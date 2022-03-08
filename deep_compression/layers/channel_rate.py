@@ -9,14 +9,14 @@ class ChannelRate(nn.Module):
 
     def __init__(
         self,
-        num_features: int,
+        num_channels: int,
         device=None,
         dtype=None,
     ):
         super().__init__()
 
         kw = {"device": device, "dtype": dtype}
-        self.rates = nn.Parameter(torch.ones(num_features, **kw))
+        self.rates = nn.Parameter(torch.ones(num_channels, **kw))
 
     def forward(self, x):
         return x / self.rates.reshape(-1, 1, 1)
@@ -40,12 +40,12 @@ class ChannelRateInverse(nn.Module):
 
 
 def create_pair(
-    num_features: int,
+    num_channels: int,
     device=None,
     dtype=None,
 ) -> tuple[ChannelRate, ChannelRateInverse]:
     channel_rate = ChannelRate(
-        num_features=num_features,
+        num_channels=num_channels,
         device=device,
         dtype=dtype,
     )
