@@ -26,6 +26,41 @@ from deep_compression.utils.catalyst import AimLogger
 from deep_compression.zoo import model_architectures
 
 
+def setup(conf: OmegaConf):
+    catalyst.utils.set_global_seed(conf.hp.experiment.seed)
+    catalyst.utils.prepare_cudnn(benchmark=True)
+
+    data_transforms = get_data_transforms(conf.hp.data)
+    datasets = get_datasets(conf, data_transforms)
+    loaders = get_dataloaders(conf.hp.data, conf.device, datasets)
+
+    model = model_architectures[conf.hp.model](**conf.hp.model_hp)
+    model = model.to(conf.device)
+
+    criterion = create_criterion(conf.hp.criterion)
+    optimizer = configure_optimizers(model, conf.hp.optimizer)
+    scheduler = {
+        "net": optim.lr_scheduler.ReduceLROnPlateau(optimizer["net"], "min"),
+    }
+
+    checkpoint_path = (
+        None
+        if not conf.resume
+        else conf.checkpoint
+        if conf.checkpoint is not None
+        else os.path.join(conf.logdir, "checkpoints", "runner.last.pth")
+    )
+
+    return (
+        model,
+        loaders,
+        criterion,
+        optimizer,
+        scheduler,
+        checkpoint_path,
+    )
+
+
 def build_args(parser) -> argparse.ArgumentParser:
     parser.add_argument(
         "--config",
@@ -74,32 +109,16 @@ def main(argv=None):
     conf = OmegaConf.merge(conf, vars(args))
     conf.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    catalyst.utils.set_global_seed(conf.hp.experiment.seed)
-    catalyst.utils.prepare_cudnn(benchmark=True)
-
-    data_transforms = get_data_transforms(conf.hp.data)
-    datasets = get_datasets(conf, data_transforms)
-    loaders = get_dataloaders(conf.hp.data, conf.device, datasets)
-
-    model = model_architectures[conf.hp.model](**conf.hp.model_hp)
-    model = model.to(conf.device)
-
-    criterion = create_criterion(conf.hp.criterion)
-    optimizer = configure_optimizers(model, conf.hp.optimizer)
-
-    resume_runner = (
-        None
-        if not conf.resume
-        else conf.checkpoint
-        if conf.checkpoint is not None
-        else os.path.join(conf.logdir, "checkpoints", "runner.last.pth")
-    )
+    (
+        model,
+        loaders,
+        criterion,
+        optimizer,
+        scheduler,
+        checkpoint_path,
+    ) = setup(conf)
 
     log_config = configure_logs(conf.logdir)
-
-    scheduler = {
-        "net": optim.lr_scheduler.ReduceLROnPlateau(optimizer["net"], "min"),
-    }
 
     runner = CustomRunner(
         config_path=conf.config,
@@ -131,7 +150,7 @@ def main(argv=None):
                 metric_key="loss",
                 minimize=True,
                 mode="runner",
-                resume_runner=resume_runner,
+                resume_runner=checkpoint_path,
                 topk=10000,
             ),
             dl.EarlyStoppingCallback(
