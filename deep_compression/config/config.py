@@ -13,7 +13,10 @@ from deep_compression.losses import (
 
 def create_criterion(conf):
     if conf.name == "RateDistortionLoss":
-        return RateDistortionLoss(lmbda=conf.lambda_)
+        return RateDistortionLoss(
+            lmbda=conf.lambda_,
+            target_bpp=conf.get("target_bpp", None),
+        )
     if conf.name == "BatchChannelDecorrelationLoss":
         return BatchChannelDecorrelationLoss(
             lmbda=conf.lambda_,
