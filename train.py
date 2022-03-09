@@ -90,6 +90,11 @@ def build_args(parser) -> argparse.ArgumentParser:
         action="store_true",
         help="Resume training",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Check training pipeline",
+    )
     return parser
 
 
@@ -173,7 +178,7 @@ def main(argv=None):
                 ),
             ),
         },
-        check=conf.hp.experiment.get("check", False),
+        check=conf.check,
     )
 
 

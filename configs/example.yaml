@@ -8,7 +8,6 @@ hp:
     seed: 1234
     epochs: 400
     patience: 100
-    check: False
   data:
     num_workers: 2
     batch_size: 8
