@@ -71,39 +71,38 @@ def main(argv=None):
 
     args = parse_args(argv)
     conf = OmegaConf.load(args.config)
-    logdir = args.logdir
-    seed = conf.hp.experiment.seed
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    conf = OmegaConf.merge(conf, vars(args))
+    conf.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    catalyst.utils.set_global_seed(seed)
+    catalyst.utils.set_global_seed(conf.hp.experiment.seed)
     catalyst.utils.prepare_cudnn(benchmark=True)
 
     data_transforms = get_data_transforms(conf.hp.data)
     datasets = get_datasets(conf, data_transforms)
-    loaders = get_dataloaders(conf.hp.data, device, datasets)
+    loaders = get_dataloaders(conf.hp.data, conf.device, datasets)
 
     model = model_architectures[conf.hp.model](**conf.hp.model_hp)
-    model = model.to(device)
+    model = model.to(conf.device)
 
     criterion = create_criterion(conf.hp.criterion)
     optimizer = configure_optimizers(model, conf.hp.optimizer)
 
     resume_runner = (
         None
-        if not args.resume
-        else args.checkpoint
-        if args.checkpoint is not None
-        else os.path.join(logdir, "checkpoints", "runner.last.pth")
+        if not conf.resume
+        else conf.checkpoint
+        if conf.checkpoint is not None
+        else os.path.join(conf.logdir, "checkpoints", "runner.last.pth")
     )
 
-    log_config = configure_logs(logdir)
+    log_config = configure_logs(conf.logdir)
 
     scheduler = {
         "net": optim.lr_scheduler.ReduceLROnPlateau(optimizer["net"], "min"),
     }
 
     runner = CustomRunner(
-        config_path=args.config,
+        config_path=conf.config,
     )
 
     runner.train(
@@ -112,7 +111,7 @@ def main(argv=None):
         optimizer=optimizer,
         scheduler=scheduler,
         loaders=loaders,
-        logdir=logdir,
+        logdir=conf.logdir,
         hparams=OmegaConf.to_container(conf.hp),
         num_epochs=conf.hp.experiment.epochs,
         valid_loader="valid",
@@ -127,7 +126,7 @@ def main(argv=None):
                 metric_key="loss",
             ),
             dl.CheckpointCallback(
-                logdir=os.path.join(logdir, "checkpoints"),
+                logdir=os.path.join(conf.logdir, "checkpoints"),
                 loader_key="valid",
                 metric_key="loss",
                 minimize=True,
@@ -144,14 +143,14 @@ def main(argv=None):
         ],
         loggers={
             "tensorboard": dl.TensorboardLogger(
-                logdir=os.path.join(logdir, "tensorboard"),
+                logdir=os.path.join(conf.logdir, "tensorboard"),
             ),
             "aim": AimLogger(
                 experiment=conf.experiment,
                 run_hash=log_config["run_hash"],
                 repo=aim.Repo(
-                    args.aim_repo,
-                    init=not aim.Repo.exists(args.aim_repo),
+                    conf.aim_repo,
+                    init=not aim.Repo.exists(conf.aim_repo),
                 ),
             ),
         },
