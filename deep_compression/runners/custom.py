@@ -26,7 +26,7 @@ class CustomRunner(dl.Runner):
 
     def on_loader_start(self, runner):
         super().on_loader_start(runner)
-        keys = ["loss", "aux_loss", "bpp_loss", "mse_loss"]
+        keys = ["loss", "aux_loss", "bpp_loss", "mse_loss", "lmbda"]
         if self.is_infer_loader:
             keys += ["psnr", "ms-ssim"]
             keys += ["bpp"]
@@ -65,7 +65,12 @@ class CustomRunner(dl.Runner):
             self.optimizer["net"].zero_grad()
             self.optimizer["aux"].zero_grad()
 
-        d = {"loss": loss, "aux_loss": aux_loss, **out_criterion}
+        d = {
+            "loss": loss,
+            "aux_loss": aux_loss,
+            **out_criterion,
+            "lmbda": self.criterion.lmbda,
+        }
         self.batch_metrics.update(d)
 
         for key in self.meters.keys():
@@ -89,6 +94,7 @@ class CustomRunner(dl.Runner):
             "loss": loss,
             "aux_loss": aux_loss,
             **out_criterion,
+            "lmbda": self.criterion.lmbda,
             **out_metrics,
             "bpp": out_infer["bpp"],
         }
