@@ -38,13 +38,12 @@ class RateDistortionLoss(nn.Module):
         lmbda = self.lmbda[0]
         out["loss"] = lmbda * 255 ** 2 * out["mse_loss"] + out["bpp_loss"]
 
-        self.num_batches += 1
-
         return out
 
     def _compute_lmbda(self, actual_bpp):
         if not self.training:
             return
+        self.num_batches += 1
         if self.target_bpp is None:
             return
         if self.num_batches.item() < MIN_BATCHES:
