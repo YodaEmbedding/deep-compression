@@ -4,7 +4,6 @@ from typing import Optional
 import torch
 import torch.nn as nn
 
-
 BPP_REL_TOL = 0.01
 LMBDA_GAIN = 10 ** (1 / 10000)
 MIN_BATCHES = 20000
