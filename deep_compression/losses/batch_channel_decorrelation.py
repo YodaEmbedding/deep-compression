@@ -6,17 +6,14 @@ import torch
 import torch.nn as nn
 
 from ..layers.utils import channel_covariance
-
+from .rate_distortion import RateDistortionLoss
 
 BPP_REL_TOL = 0.01
 LMBDA_GAIN = 10 ** (1 / 10000)
 MIN_BATCHES = 20000
 
 
-class BatchChannelDecorrelationLoss(nn.Module):
-    lmbda: torch.Tensor
-    num_batches: torch.Tensor
-
+class BatchChannelDecorrelationLoss(RateDistortionLoss):
     def __init__(
         self,
         lmbda=1e-2,
@@ -24,12 +21,7 @@ class BatchChannelDecorrelationLoss(nn.Module):
         top_k_corr=None,
         target_bpp: Optional[float] = None,
     ):
-        super().__init__()
-        self.mse = nn.MSELoss()
-        self.target_bpp = target_bpp
-        self.register_buffer("lmbda", torch.Tensor([lmbda]))
-        num_batches = torch.tensor([0], dtype=torch.int64)
-        self.register_buffer("num_batches", num_batches)
+        super().__init__(lmbda=lmbda, target_bpp=target_bpp)
         self.lmbda_corr = lmbda_corr
         self.top_k_corr = top_k_corr
 
@@ -58,24 +50,7 @@ class BatchChannelDecorrelationLoss(nn.Module):
             + self.lmbda_corr * out["corr_loss"]
         )
 
-        self.num_batches += 1
-
         return out
-
-    def _compute_lmbda(self, actual_bpp):
-        if not self.training:
-            return
-        if self.target_bpp is None:
-            return
-        if self.num_batches.item() < MIN_BATCHES:
-            return
-        abs_diff = actual_bpp - self.target_bpp
-        rel_diff = abs_diff / self.target_bpp
-        if abs(rel_diff) < BPP_REL_TOL:
-            return
-        sign = 1 if abs_diff < 0 else -1
-        gain = LMBDA_GAIN ** sign
-        self.lmbda *= gain
 
 
 def channel_rates(y: np.ndarray, method="range") -> np.ndarray:
