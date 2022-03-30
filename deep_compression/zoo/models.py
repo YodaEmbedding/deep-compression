@@ -6,6 +6,7 @@ from deep_compression.models import (
     ChannelRemixerFactorizedPrior,
     DecorrFactorizedPrior,
     FactorizedPrior,
+    ResidualPredFactorizedPrior,
 )
 
 
@@ -23,6 +24,11 @@ def setup_models():
     _register_model_copy(
         model_type=DecorrFactorizedPrior,
         model_name="bmshj2018-factorized-batch-chan-decorr",
+        base_model_name="bmshj2018-factorized",
+    )
+    _register_model_copy(
+        model_type=ResidualPredFactorizedPrior,
+        model_name="bmshj2018-factorized-residual-pred",
         base_model_name="bmshj2018-factorized",
     )
 
