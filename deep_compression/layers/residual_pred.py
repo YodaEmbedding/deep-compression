@@ -18,7 +18,6 @@ class ResidualPredBlock(nn.Module):
             nn.Conv2d(c_x1, c_x2, 3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(c_x2, c_x2, 3, padding=1),
-            nn.ReLU(inplace=True),
         )
 
     def forward(self, x: Tensor) -> Tensor:
