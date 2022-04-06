@@ -1,7 +1,13 @@
+"""
+Helps extensions of CompressAI models to reuse pretrained weights.
+"""
+
 import compressai.zoo.image as cai_zoo_img
 
 
 def create_model_creator(model_name, base_model_name):
+    """Returns model creator that uses CompressAI creators."""
+
     def model_create(*args, **kwargs):
         return models[base_model_name](model_name, *args, **kwargs)
 
