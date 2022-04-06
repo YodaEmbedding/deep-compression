@@ -5,12 +5,7 @@ import deep_compression.zoo.compressai_base as cai_base
 
 
 def setup_models():
-    from deep_compression.models import (
-        ChannelRemixerFactorizedPrior,
-        DecorrFactorizedPrior,
-        ResidualPredFactorizedPrior,
-    )
-
+    import deep_compression.models
     from deep_compression.models.compressai import (
         Cheng2020Anchor,
         Cheng2020Attention,
