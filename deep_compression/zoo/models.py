@@ -8,15 +8,33 @@ def setup_models():
     from deep_compression.models import (
         ChannelRemixerFactorizedPrior,
         DecorrFactorizedPrior,
-        FactorizedPrior,
         ResidualPredFactorizedPrior,
     )
 
-    _register_model_copy(
-        model_type=FactorizedPrior,
-        model_name="bmshj2018-factorized",
-        base_model_name="bmshj2018-factorized",
+    from deep_compression.models.compressai import (
+        Cheng2020Anchor,
+        Cheng2020Attention,
+        FactorizedPrior,
+        JointAutoregressiveHierarchicalPriors,
+        MeanScaleHyperprior,
+        ScaleHyperprior,
     )
+
+    model_architectures = {
+        "bmshj2018-factorized": FactorizedPrior,
+        "bmshj2018-hyperprior": ScaleHyperprior,
+        "mbt2018-mean": MeanScaleHyperprior,
+        "mbt2018": JointAutoregressiveHierarchicalPriors,
+        "cheng2020-anchor": Cheng2020Anchor,
+        "cheng2020-attn": Cheng2020Attention,
+    }
+
+    for model_name, model_type in model_architectures.items():
+        _register_model_copy(
+            model_type=model_type,
+            model_name=model_name,
+            base_model_name=model_name,
+        )
 
 
 def _register_model_copy_compressai(
