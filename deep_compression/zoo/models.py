@@ -16,27 +16,29 @@ def setup_models():
         model_name="bmshj2018-factorized",
         base_model_name="bmshj2018-factorized",
     )
-    _register_model_copy(
+    _register_model(
         model_type=ChannelRemixerFactorizedPrior,
         model_name="bmshj2018-factorized-chan-remixer",
-        base_model_name="bmshj2018-factorized",
     )
-    _register_model_copy(
+    _register_model(
         model_type=DecorrFactorizedPrior,
         model_name="bmshj2018-factorized-batch-chan-decorr",
-        base_model_name="bmshj2018-factorized",
     )
-    _register_model_copy(
+    _register_model(
         model_type=ResidualPredFactorizedPrior,
         model_name="bmshj2018-factorized-residual-pred",
-        base_model_name="bmshj2018-factorized",
     )
 
 
-def _register_model(
+def _register_model(model_type, model_name):
+    """Registers a custom model."""
+    cai_zoo_img.model_architectures[model_name] = model_type
+
+
+def _register_model_copy_compressai(
     model_type, model_name, model_cfg, model_create=None, model_url=None
 ):
-    """Registers a model."""
+    """Registers a model copy into CompressAI."""
 
     if model_create is None:
 
@@ -57,7 +59,7 @@ def _register_model_copy(
     model_type, model_name, base_model_name, reuse_pretrained_weights=False
 ):
     """Registers a model that uses same base architecture."""
-    _register_model(
+    _register_model_copy_compressai(
         model_type=model_type,
         model_name=model_name,
         model_create=cai_base.create_model_creator(
