@@ -373,7 +373,10 @@ class JointAutoregressiveHierarchicalPriors(
         }
 
 
-class Cheng2020Anchor(JointAutoregressiveHierarchicalPriors):
+class Cheng2020Anchor(
+    JointAutoregressiveHierarchicalPriors,
+    waseda.Cheng2020Anchor,
+):
     """Anchor model variant from `"Learned Image Compression with
     Discretized Gaussian Mixture Likelihoods and Attention Modules"
     <https://arxiv.org/abs/2001.01568>`_, by Zhengxue Cheng, Heming Sun, Masaru
@@ -398,7 +401,10 @@ class Cheng2020Anchor(JointAutoregressiveHierarchicalPriors):
         return net
 
 
-class Cheng2020Attention(Cheng2020Anchor):
+class Cheng2020Attention(
+    Cheng2020Anchor,
+    waseda.Cheng2020Attention,
+):
     """Self-attention model variant from `"Learned Image Compression with
     Discretized Gaussian Mixture Likelihoods and Attention Modules"
     <https://arxiv.org/abs/2001.01568>`_, by Zhengxue Cheng, Heming Sun, Masaru
