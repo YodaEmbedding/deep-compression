@@ -1,11 +1,11 @@
 import compressai.zoo.image as cai_zoo_img
 
 
-def create_model_factory(model_name, base_model_name):
-    def model_factory(*args, **kwargs):
+def create_model_creator(model_name, base_model_name):
+    def model_create(*args, **kwargs):
         return models[base_model_name](model_name, *args, **kwargs)
 
-    return model_factory
+    return model_create
 
 
 def bmshj2018_factorized(

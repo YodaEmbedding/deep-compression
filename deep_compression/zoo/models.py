@@ -34,18 +34,18 @@ def setup_models():
 
 
 def _register_model(
-    model_type, model_name, model_cfg, model_factory=None, model_url=None
+    model_type, model_name, model_cfg, model_create=None, model_url=None
 ):
     """Registers a model."""
 
-    if model_factory is None:
+    if model_create is None:
 
-        def model_factory_(*args, **kwargs):
+        def model_create_(*args, **kwargs):
             cai_zoo_img._load_model(model_name, *args, **kwargs)
 
-        model_factory = model_factory_
+        model_create = model_create_
 
-    cai_zoo.models[model_name] = model_factory
+    cai_zoo.models[model_name] = model_create
     cai_zoo_img.model_architectures[model_name] = model_type
     cai_zoo_img.cfgs[model_name] = model_cfg
 
@@ -60,7 +60,7 @@ def _register_model_copy(
     _register_model(
         model_type=model_type,
         model_name=model_name,
-        model_factory=cai_base.create_model_factory(
+        model_create=cai_base.create_model_creator(
             model_name, base_model_name
         ),
         model_cfg=dict(cai_zoo_img.cfgs[base_model_name]),
