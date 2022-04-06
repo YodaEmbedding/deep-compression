@@ -2,37 +2,21 @@ import compressai.zoo as cai_zoo
 import compressai.zoo.image as cai_zoo_img
 
 import deep_compression.zoo.compressai_base as cai_base
-from deep_compression.models import (
-    ChannelRemixerFactorizedPrior,
-    DecorrFactorizedPrior,
-    FactorizedPrior,
-    ResidualPredFactorizedPrior,
-)
 
 
 def setup_models():
+    from deep_compression.models import (
+        ChannelRemixerFactorizedPrior,
+        DecorrFactorizedPrior,
+        FactorizedPrior,
+        ResidualPredFactorizedPrior,
+    )
+
     _register_model_copy(
         model_type=FactorizedPrior,
         model_name="bmshj2018-factorized",
         base_model_name="bmshj2018-factorized",
     )
-    _register_model(
-        model_type=ChannelRemixerFactorizedPrior,
-        model_name="bmshj2018-factorized-chan-remixer",
-    )
-    _register_model(
-        model_type=DecorrFactorizedPrior,
-        model_name="bmshj2018-factorized-batch-chan-decorr",
-    )
-    _register_model(
-        model_type=ResidualPredFactorizedPrior,
-        model_name="bmshj2018-factorized-residual-pred",
-    )
-
-
-def _register_model(model_type, model_name):
-    """Registers a custom model."""
-    cai_zoo_img.model_architectures[model_name] = model_type
 
 
 def _register_model_copy_compressai(

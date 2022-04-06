@@ -4,8 +4,10 @@ import torch.nn.functional as F
 
 from deep_compression.layers import SEBlock
 from deep_compression.models.compressai import FactorizedPrior
+from deep_compression.utils import register_model
 
 
+@register_model("bmshj2018-factorized-chan-remixer")
 class ChannelRemixerFactorizedPrior(FactorizedPrior):
     def __init__(self, N, M, **kwargs):
         super().__init__(N, M, **kwargs)

@@ -10,8 +10,10 @@ from compressai.models.google import (
 
 from deep_compression.layers import batch_channel_decorrelation, channel_rate
 from deep_compression.models.compressai import FactorizedPrior
+from deep_compression.utils import register_model
 
 
+@register_model("bmshj2018-factorized-batch-chan-decorr")
 class DecorrFactorizedPrior(FactorizedPrior):
     def __init__(self, N, M, momentum_k=0.0, momentum_u=0.0, **kwargs):
         super().__init__(N, M, **kwargs)
