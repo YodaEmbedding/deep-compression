@@ -35,15 +35,17 @@ class DecorrFactorizedPrior(FactorizedPrior):
         )
 
     def forward(self, x):
-        y = self.g_a(x)
-        y = self.decorrelator(y)
-        y = self.channel_rate_controller(y)
+        y_pre = self.g_a(x)
+        y_pre_decorr = self.decorrelator(y_pre)
+        y = self.channel_rate_controller(y_pre_decorr)
         y_hat, y_likelihoods = self.entropy_bottleneck(y)
-        y_hat = self.channel_rate_controller_inv(
+        y_hat_post_decorr = self.channel_rate_controller_inv(
             y_hat, self.channel_rate_controller.rates
         )
-        y_hat = self.decorrelator_inv(y_hat, self.decorrelator.running_u)
-        x_hat = self.g_s(y_hat)
+        y_hat_post = self.decorrelator_inv(
+            y_hat_post_decorr, self.decorrelator.running_u
+        )
+        x_hat = self.g_s(y_hat_post)
 
         return {
             "x_hat": x_hat,
@@ -53,20 +55,22 @@ class DecorrFactorizedPrior(FactorizedPrior):
         }
 
     def compress(self, x):
-        y = self.g_a(x)
-        y = self.decorrelator(y)
-        y = self.channel_rate_controller(y)
+        y_pre = self.g_a(x)
+        y_pre_decorr = self.decorrelator(y_pre)
+        y = self.channel_rate_controller(y_pre_decorr)
         y_strings = self.entropy_bottleneck.compress(y)
         return {"strings": [y_strings], "shape": y.size()[-2:]}
 
     def decompress(self, strings, shape):
         assert isinstance(strings, list) and len(strings) == 1
         y_hat = self.entropy_bottleneck.decompress(strings[0], shape)
-        y_hat = self.channel_rate_controller_inv(
+        y_hat_post_decorr = self.channel_rate_controller_inv(
             y_hat, self.channel_rate_controller.rates
         )
-        y_hat = self.decorrelator_inv(y_hat, self.decorrelator.running_u)
-        x_hat = self.g_s(y_hat).clamp_(0, 1)
+        y_hat_post = self.decorrelator_inv(
+            y_hat_post_decorr, self.decorrelator.running_u
+        )
+        x_hat = self.g_s(y_hat_post).clamp_(0, 1)
         return {"x_hat": x_hat}
 
 
